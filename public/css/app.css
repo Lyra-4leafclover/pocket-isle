@@ -398,3 +398,5 @@ button.bag-item:hover { box-shadow: 0 0 0 2px var(--accent); }
 .bag-item.locked img { filter: brightness(0) opacity(.22); } .bag-item.locked { color: var(--ink2); }
 .rw { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; flex-wrap: wrap; } .rw img { width: 22px; height: 22px; object-fit: contain; } .rw.rare { color: #9367c8; }
 .build-card.sail { background: linear-gradient(135deg, var(--paper), #dff0f3); }
+
+.loot { display: inline-flex; gap: 6px; font-size: .78em; font-weight: 800; color: var(--ink2); flex: none; } .loot-i { display: inline-flex; align-items: center; gap: 1px; } .loot-i img { width: 18px; height: 18px; object-fit: contain; }

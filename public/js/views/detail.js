@@ -14,7 +14,7 @@ export function render(panel) {
   const t = ui.taskId && get(ui.taskId);
   if (!t) { panel.replaceChildren(h('div.detail-empty', h('img', { src: 'assets/c_owl.webp', alt: '' }), h('p.muted', 'Click a task to see its details here.'))); return; }
   // don't rebuild while typing in this task, so the cursor stays put
-  if (panel.dataset.task === t.id && panel.contains(document.activeElement) && document.activeElement.matches('textarea,input[type=text],input:not([type])')) return;
+  if (panel.dataset.task === t.id && panel.contains(document.activeElement) && document.activeElement.matches('textarea,input[type=text],input:not([type])') && !document.activeElement.matches('.ck-add')) return;
   if (editing.id !== t.id) editing = { id: t.id, preview: !!t.content };
   panel.dataset.task = t.id;
   const list = T.listById(t.listId);
@@ -43,8 +43,8 @@ export function render(panel) {
       h('button.ck-box', { onclick: () => { const n = items.map((x) => (x.id === it.id ? { ...x, done: !x.done } : x)); patch(t.id, { items: n }); if (n.every((x) => x.done) && n.length > 1 && T.isOpen(t)) toast('All items ticked. Finish the task?', { label: 'Complete', run: () => T.complete(get(t.id)) }); } }, it.done ? '✓' : ''),
       h('input.ck-text', { value: it.title, 'data-keep': 'ck:' + it.id, oninput: (e) => save(t.id, { items: get(t.id).items.map((x) => (x.id === it.id ? { ...x, title: e.target.value } : x)) }),
         onkeydown: (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); const n = [...get(t.id).items]; n.splice(idx + 1, 0, { id: uid(), title: '', done: false }); patch(t.id, { items: n }); setTimeout(() => panel.querySelectorAll('.ck-text')[idx + 1]?.focus(), 40); }
-          if (e.key === 'Backspace' && !e.target.value) { e.preventDefault(); patch(t.id, { items: get(t.id).items.filter((x) => x.id !== it.id) }); setTimeout(() => panel.querySelectorAll('.ck-text')[Math.max(0, idx - 1)]?.focus(), 40); }
+          if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); const n = [...get(t.id).items]; n.splice(idx + 1, 0, { id: uid(), title: '', done: false }); patch(t.id, { items: n }); setTimeout(() => panel.querySelectorAll('.ck-text')[idx + 1]?.focus(), 40); }
+          if (e.key === 'Backspace' && !e.target.value) { e.preventDefault(); e.target.blur(); patch(t.id, { items: get(t.id).items.filter((x) => x.id !== it.id) }); setTimeout(() => panel.querySelectorAll('.ck-text')[Math.max(0, idx - 1)]?.focus(), 40); }
         } }),
       h('button.icon-btn.sm', { title: 'Turn into a subtask', onclick: () => { T.newTask({ title: it.title, parentId: t.id, listId: t.listId, due: null, status: it.done ? 2 : 0 }); patch(t.id, { items: items.filter((x) => x.id !== it.id) }); } }, '↳'),
       h('button.icon-btn.sm', { title: 'Remove', onclick: () => patch(t.id, { items: items.filter((x) => x.id !== it.id) }) }, '✕'))),
