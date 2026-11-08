@@ -1,0 +1,10 @@
+Ambience recordings (trimmed, loudness-normalized, re-encoded to MP3). All from Wikimedia Commons.
+
+crackle.mp3  - "Campfire sound ambience.ogg" by Glaneur de sons - CC BY 3.0 - https://commons.wikimedia.org/wiki/File:Campfire_sound_ambience.ogg
+rain.mp3     - "Rain (1).ogg" by ezwa - Public domain - https://commons.wikimedia.org/wiki/File:Rain_(1).ogg
+cafe.mp3     - "Restaurant ambience.ogg" by stephan - Public domain - https://commons.wikimedia.org/wiki/File:Restaurant_ambience.ogg
+lofi.mp3     - "Lofi Hip Hop Upbeat" by Raspberrymusic - CC BY 4.0 - https://commons.wikimedia.org/wiki/File:Raspberrymusic_-_Lofi_Hip_Hop_Upbeat.ogg
+ocean.mp3    - "Oceanwavescrushing.ogg" by Luftrum - CC BY 3.0 - https://commons.wikimedia.org/wiki/File:Oceanwavescrushing.ogg
+thunder.mp3  - "Summer thunderstorm in the woods.ogg" by Serg Childed - CC BY-SA 4.0 - https://commons.wikimedia.org/wiki/File:Summer_thunderstorm_in_the_woods.ogg
+library.mp3  - "TU Delft Library, quiet study room - general ambience" by el_mar - CC BY 3.0 - https://commons.wikimedia.org/wiki/File:20121112_TU_Delft_Library,_quiet_study_room_-_general_ambience_-_SoundCloud_-_el_mar.ogg
+forest.mp3   - "Bourne Woods Birdsong 2020-04-27 0751.mp3" by Robert EA Harvey - CC BY-SA 4.0 - https://commons.wikimedia.org/wiki/File:Bourne_Woods_Birdsong_2020-04-27_0751.mp3
