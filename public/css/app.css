@@ -381,3 +381,20 @@ body:not(.detail-open) .detail { visibility: hidden; }
   .rail, .sidebar, .tabbar, .quickadd, .head-actions, .detail, .batch-bar { display: none !important; }
   body, .app, .main, .view-body { display: block; overflow: visible !important; height: auto !important; background: #fff; }
 }
+
+/* date picker quick labels, mobile lists button */
+.dp-quick button { display: grid; justify-items: center; gap: 1px; } .dp-quick small { font-size: .6em; font-weight: 800; color: var(--ink2); }
+.icon-btn:has(.lbl) { width: auto; padding: 0 10px; gap: 6px; display: inline-flex; align-items: center; } .icon-btn .lbl { font-size: .8em; font-weight: 800; }
+/* island: forever content */
+.seg.tabs { flex-wrap: wrap; border-radius: 18px; } .seg.tabs button { flex: 1 0 auto; }
+.island-scene.free-place { cursor: crosshair; } .island-scene.free-place .sprite { pointer-events: none; }
+.sprite .lvl { position: absolute; top: -6%; left: 50%; transform: translateX(-50%); font-size: 1.5cqw; color: #e9b53a; text-shadow: 0 1px 2px rgba(60, 40, 0, .5); white-space: nowrap; pointer-events: none; }
+.sprite.moving { opacity: .45; } .stars { color: #d9a32a; }
+.side-h { margin: 14px 0 2px; font: 800 .8em Nunito, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji'; text-transform: uppercase; letter-spacing: .06em; color: var(--ink2); }
+.bag { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
+.bag-item { position: relative; display: grid; justify-items: center; align-content: start; gap: 2px; background: var(--paper); border: 0; border-radius: 14px; padding: 6px 4px; font-size: .76em; text-align: center; color: var(--ink); line-height: 1.2; }
+button.bag-item:hover { box-shadow: 0 0 0 2px var(--accent); }
+.bag-item img { width: 50px; height: 50px; object-fit: contain; } .bag-item b { position: absolute; top: 4px; right: 6px; }
+.bag-item.locked img { filter: brightness(0) opacity(.22); } .bag-item.locked { color: var(--ink2); }
+.rw { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; flex-wrap: wrap; } .rw img { width: 22px; height: 22px; object-fit: contain; } .rw.rare { color: #9367c8; }
+.build-card.sail { background: linear-gradient(135deg, var(--paper), #dff0f3); }

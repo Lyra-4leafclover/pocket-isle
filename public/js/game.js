@@ -186,6 +186,7 @@ export function onVisitIsland() {
       if (n) { const r = LIST_RES[Math.floor(Math.random() * LIST_RES.length)]; give({ [r]: Math.min(3, n) }, 'gift'); log(`Your neighbours left you ${Math.min(3, n)} ${RES[r].name.toLowerCase()} at the gazebo.`, 'b_gazebo'); }
     }
     if (has('library')) weeklyRecap();
+    dividends();
   }
   if (V.days.length >= 14) arrive('turtle');
   settleCritters();
@@ -204,7 +205,7 @@ function weeklyRecap() {
 }
 
 // ---------- neighbours ----------
-export function capacity() { return v().buildings.reduce((a, b) => a + (BUILDINGS[b.type]?.homes || 0), 0); }
+export function capacity() { return v().buildings.reduce((a, b) => a + (BUILDINGS[b.type]?.homes ? BUILDINGS[b.type].homes + lvl(b) - 1 : 0), 0); }
 export const homed = () => Object.entries(v().critters).filter(([, c]) => c.home).map(([k]) => k);
 export const waiting = () => Object.entries(v().critters).filter(([, c]) => !c.home).map(([k]) => k);
 export function arrive(key) {
@@ -225,18 +226,18 @@ function settleCritters() {
 export function canAfford(cost) { const inv = v().inv; return Object.entries(cost).every(([r, n]) => (inv[r] || 0) >= n); }
 export function canBuild(type) {
   const b = BUILDINGS[type];
-  return canAfford(b.cost) && count(type) < (b.max || 1) && freeSpots(b.shore).length > 0;
+  return canAfford(b.cost) && v().buildings.filter((x) => x.type === type && onIsle(x)).length < (b.max || 1) && freeSpots(b.shore).length > 0;
 }
 export function freeSpots(shore) {
   const spots = shore ? SHORE : PLOTS;
-  const used = new Set(v().buildings.filter((b) => !!BUILDINGS[b.type]?.shore === !!shore).map((b) => b.plot));
+  const used = new Set(v().buildings.filter((b) => onIsle(b) && !!BUILDINGS[b.type]?.shore === !!shore).map((b) => b.plot));
   return spots.map((p, i) => ({ ...p, i })).filter((p) => !used.has(p.i));
 }
 export function build(type, plot) {
   const b = BUILDINGS[type], V = v();
   if (!canAfford(b.cost)) return false;
   for (const [r, n] of Object.entries(b.cost)) V.inv[r] -= n;
-  V.buildings.push({ id: Date.now().toString(36), type, plot, at: Date.now() });
+  V.buildings.push({ id: Date.now().toString(36), type, plot, isle: curIsle(), at: Date.now() });
   log(`You built the ${b.name}.`, 'b_' + type);
   if (type === 'dock') arrive('otter');
   settleCritters();
@@ -286,3 +287,161 @@ export function timeOfDay(d = new Date()) {
   return 'night';
 }
 export function season(d = new Date()) { const m = d.getMonth(); return m <= 1 || m === 11 ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn'; }
+
+// ---------- forever: more islands, decorations, monthly items, requests, upgrades ----------
+export const ISLES = [
+  { key: 'meadow', name: 'Clover Meadow', img: 'island' },
+  { key: 'forest', name: 'Mistwood', img: 'island_forest' },
+  { key: 'blossom', name: 'Petal Bay', img: 'island_blossom' },
+  { key: 'snow', name: 'Frostfern', img: 'island_snow' },
+];
+const ROMAN = ['', '', ' II', ' III', ' IV', ' V', ' VI', ' VII', ' VIII', ' IX', ' X'];
+export const curIsle = () => v().isle || 0;
+export const isleCount = () => v().isles || 1;
+export const isleImg = (n = curIsle()) => `assets/${ISLES[n % ISLES.length].img}.webp`;
+export function isleName(n = curIsle()) { const r = Math.floor(n / ISLES.length) + 1; return ISLES[n % ISLES.length].name + (ROMAN[r] ?? ' ' + r); }
+export const onIsle = (b, n = curIsle()) => (b.isle || 0) === n;
+export const SAIL_NEED = 8;
+export const sailCost = (n = isleCount()) => ({ wood: 12 + 8 * n, stone: 8 + 6 * n, fish: 4 + 4 * n, seaglass: 2 + 2 * n });
+export const sailProgress = () => v().buildings.filter((b) => onIsle(b, isleCount() - 1)).length;
+export const canSail = () => sailProgress() >= SAIL_NEED && canAfford(sailCost());
+function spend(cost) { const inv = v().inv; for (const [r, n] of Object.entries(cost)) inv[r] = (inv[r] || 0) - n; }
+export function sail() {
+  if (!canSail()) return false;
+  const V = v();
+  spend(sailCost());
+  V.isles = isleCount() + 1; V.isle = V.isles - 1;
+  log(`You sailed to a brand new island: ${isleName(V.isle)}!`, 'x_boat');
+  saveVillage();
+  return true;
+}
+export function goIsle(n) { v().isle = Math.max(0, Math.min(isleCount() - 1, n)); saveVillage(); }
+
+export const DECOR = {
+  lamp: { name: 'Lamp Post', cost: { stone: 2, seaglass: 1 }, size: 4 },
+  bench: { name: 'Bench', cost: { wood: 3 }, size: 6 },
+  fence: { name: 'Picket Fence', cost: { wood: 2 }, size: 6 },
+  flowerbed: { name: 'Flower Bed', cost: { wood: 1, petals: 3 }, size: 6 },
+  mailbox: { name: 'Mailbox', cost: { wood: 1, clay: 1 }, size: 3.5 },
+  birdbath: { name: 'Bird Bath', cost: { stone: 3 }, size: 4.5 },
+  signpost: { name: 'Signpost', cost: { wood: 2 }, size: 4 },
+  scarecrow: { name: 'Scarecrow', cost: { wool: 2, harvest: 1 }, size: 5 },
+  fountain: { name: 'Fountain', cost: { stone: 6, seaglass: 2 }, size: 7 },
+  campfire: { name: 'Campfire', cost: { wood: 3, stone: 2 }, size: 5 },
+  haybale: { name: 'Hay Bale', cost: { harvest: 2 }, size: 4.5 },
+  barrels: { name: 'Barrels', cost: { wood: 3, fish: 1 }, size: 5 },
+  picnic: { name: 'Picnic Blanket', cost: { wool: 2, harvest: 1 }, size: 6 },
+  swing: { name: 'Tree Swing', cost: { wood: 5, wool: 1 }, size: 7 },
+  beehive: { name: 'Beehive', cost: { wood: 2, petals: 2 }, size: 4.5 },
+  lilypond: { name: 'Lily Pond', cost: { stone: 3, fish: 2 }, size: 7 },
+  rosearch: { name: 'Rose Arch', cost: { wood: 3, petals: 4 }, size: 6 },
+  bunnystatue: { name: 'Bunny Statue', cost: { stone: 4, clay: 2 }, size: 4.5 },
+};
+export const SEASONAL = {
+  snowman: { name: 'Snowman', month: 0, cost: { wool: 3, stone: 2 }, size: 5 },
+  heartlanterns: { name: 'Heart Lanterns', month: 1, cost: { petals: 4, wood: 2 }, size: 6 },
+  kite: { name: 'Kite', month: 2, cost: { wool: 2, wood: 2 }, size: 5 },
+  sakura: { name: 'Cherry Tree', month: 3, cost: { petals: 6, wood: 3 }, size: 8 },
+  maypole: { name: 'Maypole', month: 4, cost: { wool: 3, wood: 3 }, size: 6 },
+  umbrella: { name: 'Beach Umbrella', month: 5, cost: { wool: 3, fish: 2 }, size: 7 },
+  sandcastle: { name: 'Sandcastle', month: 6, cost: { stone: 3, seaglass: 1 }, size: 6 },
+  lanterns: { name: 'Paper Lanterns', month: 7, cost: { petals: 3, wood: 3 }, size: 8 },
+  applecart: { name: 'Apple Cart', month: 8, cost: { harvest: 4, wood: 3 }, size: 6 },
+  pumpkins: { name: 'Pumpkin Pile', month: 9, cost: { harvest: 5 }, size: 6 },
+  leafpile: { name: 'Leaf Pile', month: 10, cost: { wood: 3, petals: 2 }, size: 6 },
+  xmastree: { name: 'Festive Pine', month: 11, cost: { wood: 5, seaglass: 2 }, size: 7 },
+};
+export const RARE = {
+  grandfountain: { name: 'Grand Fountain', size: 10 }, balloon: { name: 'Hot Air Balloon', size: 8 }, mushroomhouse: { name: 'Mushroom House', size: 9 },
+  rainbow: { name: 'Rainbow Arch', size: 9 }, geode: { name: 'Crystal Geode', size: 7 }, totem: { name: 'Critter Totem', size: 5 },
+  icecream: { name: 'Ice Cream Cart', size: 7 }, carousel: { name: 'Carousel', size: 10 }, koipond: { name: 'Koi Pond', size: 10 },
+};
+export const decorInfo = (k) => DECOR[k] || SEASONAL[k] || RARE[k] || { name: k, size: 5 };
+export const seasonalNow = (d = new Date()) => Object.keys(SEASONAL).filter((k) => SEASONAL[k].month === d.getMonth());
+export const stash = () => (v().stash ||= {});
+export const decorHere = () => (v().decor || []).filter((d) => onIsle(d));
+export function buyDecor(k) {
+  const info = DECOR[k] || SEASONAL[k];
+  if (!info || (SEASONAL[k] && SEASONAL[k].month !== new Date().getMonth()) || !canAfford(info.cost)) return false;
+  spend(info.cost);
+  stash()[k] = (stash()[k] || 0) + 1;
+  saveVillage();
+  return true;
+}
+export function placeDecor(k, x, y) {
+  const s = stash();
+  if (!s[k]) return false;
+  if (!--s[k]) delete s[k];
+  (v().decor ||= []).push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), type: k, isle: curIsle(), x, y });
+  saveVillage();
+  return true;
+}
+export function moveDecor(id, x, y) { const d = (v().decor || []).find((o) => o.id === id); if (d) { d.x = x; d.y = y; saveVillage(); } }
+export function storeDecor(id) {
+  const V = v(), d = (V.decor || []).find((o) => o.id === id);
+  if (!d) return;
+  V.decor = V.decor.filter((o) => o !== d);
+  stash()[d.type] = (stash()[d.type] || 0) + 1;
+  saveVillage();
+}
+
+function rng(a) { return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+export function requests() {
+  const V = v(), d = today();
+  if (!V.requests || V.requests.day !== d) V.requests = { day: d, list: makeRequests(d) };
+  return V.requests.list;
+}
+function makeRequests(d) {
+  const V = v(), r = rng(hash(d + (V.owner || '')));
+  const pick = (a) => a[Math.floor(r() * a.length)];
+  const found = Object.keys(V.critters);
+  const pool = found.length ? found : ['fox', 'rabbit', 'duck'];
+  const scale = 3 + Math.min(20, Math.floor(V.buildings.length / 2) + isleCount() - 1);
+  const res = Object.keys(RES), rares = Object.keys(RARE), got = V.rareGot || {};
+  const missing = rares.filter((k) => !got[k]);
+  return [0, 1, 2].map((i) => {
+    const a = pick(res);
+    let b = pick(res);
+    if (b === a) b = res[(res.indexOf(a) + 1) % res.length];
+    const rare = i === 0 && r() < 0.6;
+    const mul = rare ? 2 : 1;
+    const ask = { [a]: (scale + Math.floor(r() * 4)) * mul, [b]: (Math.ceil(scale / 2) + Math.floor(r() * 3)) * mul };
+    let reward;
+    if (rare) reward = { rare: missing.length ? pick(missing) : pick(rares) };
+    else if (i < 2) reward = { decor: pick(Object.keys(DECOR)) };
+    else reward = { loot: { [pick(res.filter((x) => !(x in ask)))]: scale * 2, seaglass: 1 } };
+    return { who: pick(pool), ask, reward, done: false };
+  });
+}
+export function fulfil(i) {
+  const q = requests()[i];
+  if (!q || q.done || !canAfford(q.ask)) return false;
+  spend(q.ask);
+  q.done = true;
+  const s = stash(), nm = CRITTERS[q.who]?.name || 'A traveller';
+  if (q.reward.rare) { s[q.reward.rare] = (s[q.reward.rare] || 0) + 1; (v().rareGot ||= {})[q.reward.rare] = true; log(`${nm} gave you a rare ${RARE[q.reward.rare].name}!`, 'd_' + q.reward.rare); }
+  else if (q.reward.decor) { s[q.reward.decor] = (s[q.reward.decor] || 0) + 1; log(`${nm} gave you a ${DECOR[q.reward.decor].name}.`, 'd_' + q.reward.decor); }
+  else { give(q.reward.loot, 'request'); log(`${nm} thanked you with a bundle of materials.`, 'c_' + q.who); }
+  if (requests().every((x) => x.done)) { give({ seaglass: 2 }, 'request'); log('You helped every neighbour today. They left 2 sea glass on your doorstep.', 'r_seaglass'); }
+  saveVillage();
+  return true;
+}
+
+export const MAX_LVL = 3;
+export const lvl = (b) => b.lvl || 1;
+export const upgradeCost = (b) => Object.fromEntries(Object.entries(BUILDINGS[b.type].cost).map(([r, n]) => [r, n * (lvl(b) + 1)]));
+export function upgrade(id) {
+  const b = v().buildings.find((x) => x.id === id);
+  if (!b || lvl(b) >= MAX_LVL || !canAfford(upgradeCost(b))) return false;
+  spend(upgradeCost(b));
+  b.lvl = lvl(b) + 1;
+  log(`You upgraded the ${BUILDINGS[b.type].name} (${'★'.repeat(b.lvl - 1)}).`, 'b_' + b.type);
+  settleCritters();
+  saveVillage();
+  return true;
+}
+function dividends() {
+  const loot = {};
+  for (const b of v().buildings) if (lvl(b) > 1) addLoot(loot, Object.keys(BUILDINGS[b.type].cost)[0], lvl(b) - 1);
+  if (Object.keys(loot).length) { give(loot, 'upgrades'); log('Your upgraded buildings made you some materials overnight.', 'r_harvest'); }
+}

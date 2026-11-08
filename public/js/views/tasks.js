@@ -70,7 +70,7 @@ export function render(main, key) {
   const view = closedView ? 'list' : noteList ? 'notes' : prefs.view;
 
   const head = h('div.view-head',
-    h('button.icon-btn.mobile-only', { onclick: () => { ui.sidebarOpen = true; ui.render(); }, 'aria-label': 'Lists' }, '☰'),
+    h('button.icon-btn.mobile-only', { onclick: () => { ui.sidebarOpen = true; ui.render(); }, 'aria-label': 'Lists' }, '☰', h('span.lbl', 'Lists')),
     h('h1', list?.emoji ? list.emoji + ' ' : '', T.titleFor(key)),
     list && store.members[list.id]?.length ? h('span.members', store.members[list.id].slice(0, 4).map((m) => avatar(m.id, 24))) : null,
     h('span.count', open.length || ''),

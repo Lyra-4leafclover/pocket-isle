@@ -268,7 +268,7 @@ export function datePicker(anchor, t, onChange, { allowRepeat = true } = {}) {
     const timeInput = (val, set) => h('input.input.sm', { type: 'time', value: val && hasTime(val) ? timeOf(val) : '', onchange: (e) => set(e.target.value) });
     wrap.replaceChildren(
       h('div.dp-tabs', h('button' + (mode === 'date' ? '.on' : ''), { onclick: () => { mode = 'date'; start = null; render(); } }, 'Date'), h('button' + (mode === 'range' ? '.on' : ''), { onclick: () => { mode = 'range'; start = start || due || today(); due = due || start; render(); } }, 'Duration')),
-      h('div.dp-quick', [['☀️', 'Today', today()], ['🌤️', 'Tomorrow', ymd(addDays(today(), 1))], ['📅', 'Next Monday', ymd(addDays(ymd(startOfWeek(today(), 1)), 7))], ['🌙', 'Next month', ymd(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1))]].map(([i, l, d]) => h('button', { title: l, onclick: () => { mode = 'date'; start = null; setDay(d); } }, i))),
+      h('div.dp-quick', [['☀️', 'Today', today()], ['🌤️', 'Tomorrow', ymd(addDays(today(), 1))], ['📅', 'Next Monday', ymd(addDays(ymd(startOfWeek(today(), 1)), 7))], ['🌙', 'Next month', ymd(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1))]].map(([i, l, d]) => h('button', { title: l, onclick: () => { mode = 'date'; start = null; setDay(d); } }, h('span', i), h('small', l)))),
       h('div.dp-head', h('button.icon-btn', { onclick: () => { view = new Date(y, m - 1, 1); render(); } }, '‹'), h('b', `${MONTHS_LONG[m]} ${y}`), h('button.icon-btn', { onclick: () => { view = new Date(y, m + 1, 1); render(); } }, '›')),
       h('div.dp-grid', [...Array(7)].map((_, i) => h('span.dp-dow', DOW[(i + ws) % 7][0])), cells),
       mode === 'date'

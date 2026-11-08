@@ -49,6 +49,14 @@ Everything on the island is painted in a soft watercolor style.
 
 You can move buildings around and build on the shore. The island also changes with the time of day and the season.
 
+### 🌊 It never runs out
+
+- **More islands.** Once you've built 8 things, a boat can take you to a new island: Mistwood (forest), Petal Bay (blossoms), Frostfern (snow), then on and on forever. Every building can be built again on every island, and you can switch between islands any time.
+- **Upgrades.** Every building can be upgraded twice (★, ★★). Upgraded buildings make materials every day you visit, and upgraded homes fit more neighbours.
+- **Decorations.** Lamps, benches, fences, flower beds, ponds, swings, beehives and more. Place them anywhere and move them whenever you like.
+- **Only this month.** Each month has its own decoration (a snowman in January, a cherry tree in April, pumpkins in October...) that leaves the shop when the month ends.
+- **Neighbour requests.** Every morning your neighbours ask for 3 things. Helping them gets you decorations, bundles of materials, and sometimes a **rare treasure** you can't buy, like a carousel, a hot air balloon or a crystal geode.
+
 ## ✅ Everything it can do
 
 **Tasks**
